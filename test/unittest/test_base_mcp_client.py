@@ -82,12 +82,21 @@ def oxy_request(mas_env):
 # ──────────────────────────────────────────────────────────────────────────────
 # Tests
 # ──────────────────────────────────────────────────────────────────────────────
+# @pytest.mark.asyncio
+# async def test_list_tools_registers_mcp_tools(client, mas_env):
+#     await client.list_tools()
+#     assert client.included_tool_name_list == ["dummy_tool"]
+#     assert isinstance(mas_env.oxy_name_to_oxy["dummy_tool"], MCPTool)
+#     assert mas_env.add_oxy_calls == ["dummy_tool"]
+
+
 @pytest.mark.asyncio
 async def test_list_tools_registers_mcp_tools(client, mas_env):
     await client.list_tools()
-    assert client.included_tool_name_list == ["dummy_tool"]
-    assert isinstance(mas_env.oxy_name_to_oxy["dummy_tool"], MCPTool)
-    assert mas_env.add_oxy_calls == ["dummy_tool"]
+    # 工具名应为"remote_server_dummy_tool"（server_name 为 "remote_server"）
+    assert client.included_tool_name_list == ["remote_server_dummy_tool"]
+    assert isinstance(mas_env.oxy_name_to_oxy["remote_server_dummy_tool"], MCPTool)
+    assert mas_env.add_oxy_calls == ["remote_server_dummy_tool"]
 
 
 @pytest.mark.asyncio

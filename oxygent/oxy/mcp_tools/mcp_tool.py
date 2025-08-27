@@ -27,10 +27,11 @@ class MCPTool(BaseTool):
     """
 
     is_permission_required: bool = Field(True, description="")
-
     mcp_client: Any = Field(None, exclude=True)
     server_name: str = Field("")
+    original_name: str = Field("", description="MCP Server original tool name")
 
     async def _execute(self, oxy_request: OxyRequest) -> OxyResponse:
         """Execute the MCP tool by delegating to the parent MCP client."""
+        oxy_request.callee = self.original_name
         return await self.mcp_client._execute(oxy_request)

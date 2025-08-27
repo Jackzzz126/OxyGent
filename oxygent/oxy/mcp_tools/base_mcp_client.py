@@ -81,10 +81,11 @@ class BaseMCPClient(BaseTool):
         for item in tools_response:
             if isinstance(item, tuple) and item[0] == "tools":
                 for tool in item[1]:
-                    self.included_tool_name_list.append(tool.name)
-
+                    unique_tool_name = f"{self.name}_{tool.name}"
+                    self.included_tool_name_list.append(unique_tool_name)
                     mcp_tool = MCPTool(
-                        name=tool.name,
+                        name=unique_tool_name,
+                        original_name=tool.name,
                         desc=tool.description,
                         mcp_client=self,
                         server_name=self.name,
