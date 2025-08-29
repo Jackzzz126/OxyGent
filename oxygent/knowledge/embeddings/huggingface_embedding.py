@@ -16,10 +16,16 @@ class HuggingFaceEmbedding(AbstractEmbedding):
         # 同步模型异步包装
         import asyncio
         loop = asyncio.get_event_loop()
+        # 正确：将参数作为关键字参数传递（使用 *args 和 **kwargs 分离）
         embeddings = await loop.run_in_executor(
-            None, self.model.encode, texts, True  # 启用L2归一化
+            None,
+            lambda: self.model.encode(
+                texts,
+                prompt_name="query",  # 直接传递字符串参数
+                convert_to_numpy=True
+            )
         )
-        return np.array(embeddings)
+        return embeddings
 
     @property
     def dimension(self) -> int:
