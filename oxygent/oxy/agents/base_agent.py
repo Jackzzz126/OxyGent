@@ -172,7 +172,7 @@ class BaseAgent(BaseFlow):
                     }
                 else:
                     to_save_group_data = to_json(oxy_request.group_data)
-                await self.mas.es_client.index(
+                await self.mas.es_client.update(
                     Config.get_app_name() + "_trace",
                     doc_id=oxy_request.current_trace_id,
                     body={
