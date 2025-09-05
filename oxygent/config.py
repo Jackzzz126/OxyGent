@@ -95,6 +95,8 @@ class Config:
             "welcome_message": "Hi, I’m OxyGent. How can I assist you?",
         },
         "tool": {"mcp_is_keep_alive": True, "is_concurrent_init": True},
+
+         #"kb_agent_config":{"agent_001" : {"milvus_table_01"}}
     }
 
     @classmethod

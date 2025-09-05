@@ -1,7 +1,5 @@
 
-from oxygent.oxy.base_oxy import Oxy
-from oxygent.schemas import OxyRequest, OxyResponse
-from .knowledge_unit import KnowledgeUnit
+# oxygent/knowledge/document_processor.py
 from typing import List, Dict
 import fitz
 import docx
@@ -9,12 +7,11 @@ import time
 import uuid
 import markdown
 from bs4 import BeautifulSoup
+from .knowledge_unit import KnowledgeUnit
 
-# todo 支持多模态 -> 抽象
-# 继承对象Oxy的利弊
-class DocumentProcessor(Oxy):
-    """文档处理组件，实现智能分段与元数据提取"""
-    category: str = "kb_processor"
+
+class DocumentProcessor:
+    """文档处理组件，实现智能分段与元数据提取（去除Oxy依赖）"""
     supported_formats: List[str] = ["pdf", "docx", "txt", "md"]
 
     async def _parse_pdf(self, file_path: str) -> str:
@@ -65,27 +62,42 @@ class DocumentProcessor(Oxy):
 
         return chunks
 
-    async def _execute(self, oxy_request: OxyRequest) -> OxyResponse:
-        file_path = oxy_request.arguments.get("file_path")
-        owner = oxy_request.arguments.get("owner", "system")
-        document_id = oxy_request.arguments.get("document_id", f"doc_{uuid.uuid4()}")
+    async def process(self, file_path: str, owner: str = "system",
+                      document_id: str = None, chunk_size: int = 500) -> Dict[str, any]:
+        """
+        处理文档并生成知识单元
+
+        Args:
+            file_path: 文档路径
+            owner: 文档所有者
+            document_id: 文档ID，若未提供则自动生成
+            chunk_size: 分段大小
+
+        Returns:
+            处理结果字典，包含状态和知识单元列表
+        """
+        # 生成文档ID（如果未提供）
+        document_id = document_id or f"doc_{uuid.uuid4()}"
 
         # 1. 解析文档
         ext = file_path.split(".")[-1].lower()
         if ext not in self.supported_formats:
-            return OxyResponse(
-                state="error",
-                output=f"Unsupported format: {ext}, supported: {self.supported_formats}"
-            )
+            return {
+                "state": "error",
+                "output": f"Unsupported format: {ext}, supported: {self.supported_formats}"
+            }
 
         parse_method = getattr(self, f"_parse_{ext}", None)
         if not parse_method:
-            return OxyResponse(state="error", output=f"No parser for {ext}")
+            return {
+                "state": "error",
+                "output": f"No parser for {ext}"
+            }
 
         content = await parse_method(file_path)
 
         # 2. 分段处理
-        chunks = await self._split_into_chunks(content)
+        chunks = await self._split_into_chunks(content, chunk_size)
 
         # 3. 生成知识单元
         knowledge_units = [
@@ -103,7 +115,7 @@ class DocumentProcessor(Oxy):
             ) for chunk_id, chunk in chunks.items()
         ]
 
-        return OxyResponse(
-            state="completed",
-            output=[ku.dict() for ku in knowledge_units]
-        )
+        return {
+            "state": "completed",
+            "output": [ku.dict() for ku in knowledge_units]
+        }

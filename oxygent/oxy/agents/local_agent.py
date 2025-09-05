@@ -109,6 +109,9 @@ class LocalAgent(BaseAgent):
 
     team_size: int = Field(1, description="Number of instances for team execution")
 
+    #添加知识库映射参数:
+
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -323,6 +326,7 @@ class LocalAgent(BaseAgent):
                     llm_tool_desc_list.append(oxy_response.output)
         return llm_tool_desc_list
 
+    # 参数构建->
     def _build_instruction(self, arguments) -> str:
         """Build instruction prompt by substituting template variables.
 
@@ -349,6 +353,11 @@ class LocalAgent(BaseAgent):
         Returns:
             OxyRequest: The request with short_memory populated.
         """
+
+        #实现知识库的调用: 知识库注册为oxy
+
+
+
         oxy_request = await super()._pre_process(oxy_request)
         if not oxy_request.has_short_memory():
             short_memory = await self._get_history(oxy_request)

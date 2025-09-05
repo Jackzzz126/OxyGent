@@ -114,9 +114,11 @@ class Oxy(BaseModel, ABC):
         description="Whether to show detailed observation logs",
     )
 
+    #前置处理
     func_process_input: Callable = Field(
         default_async_identity, exclude=True, description="Input processing function"
     )
+    #后置处理
     func_process_output: Callable = Field(
         default_async_identity, exclude=True, description="Output processing function"
     )

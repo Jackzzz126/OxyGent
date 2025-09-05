@@ -1,4 +1,4 @@
-
+# oxygent/knowledge/embeddings/huggingface_embedding.py
 from .abc_embedding import AbstractEmbedding
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -16,7 +16,6 @@ class HuggingFaceEmbedding(AbstractEmbedding):
         # 同步模型异步包装
         import asyncio
         loop = asyncio.get_event_loop()
-        # 正确：将参数作为关键字参数传递（使用 *args 和 **kwargs 分离）
         embeddings = await loop.run_in_executor(
             None,
             lambda: self.model.encode(

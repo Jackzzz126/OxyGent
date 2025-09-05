@@ -1,8 +1,8 @@
 
+# oxygent/knowledge/embeddings/remote_embedding.py
 from .abc_embedding import AbstractEmbedding
 import httpx
 import numpy as np
-import base64
 from typing import List
 
 

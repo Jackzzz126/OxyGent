@@ -36,6 +36,7 @@ async def main():
     # 1. 测试HuggingFace嵌入模型
     hf_embedding = HuggingFaceEmbedding(
         model_name_or_path="all-MiniLM-L6-v2",  # 轻量级通用模型
+        # model_name_or_path="shibing624/text2vec-base-chinese",  # 轻量级通用模型
         device="cpu"  # 可选"cuda"启用GPU加速
     )
     await embedding_func(hf_embedding, test_texts)

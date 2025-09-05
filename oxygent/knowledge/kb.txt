@@ -1,0 +1,4 @@
+process:
+init:
+create kb -> register datasource -> associate agent
+
