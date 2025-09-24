@@ -861,8 +861,20 @@ class MAS(BaseModel):
                 "token": token
             }
 
-            response = requests.post(url, headers=headers, json=data)
-            return json.loads(response.text)['data']
+            try:
+                response = requests.post(url, headers=headers, json=data)
+                # 检查HTTP状态码是否为成功状态
+                response.raise_for_status()
+                # 尝试解析JSON响应
+                result = json.loads(response.text)
+                # 检查是否包含data字段
+                if 'data' in result:
+                    return result['data']
+                else:
+                    return f"错误：响应中不包含data字段，响应内容：{response.text}"
+            except Exception as e:
+                return f"错误：{str(e)}，响应内容：{response.text}"
+
         def game_submit(competition_id, commit_id, token, query, question_id, trace_id, from_trace_id):
             url = "http://contest-site-stage.web-p.jd.com/oxy/games/submit?functionId=oxy_game_activity&appid=oxygent_contest&loginType=3"
 
@@ -880,10 +892,22 @@ class MAS(BaseModel):
                 "trace_id": trace_id,
                 "from_trace_id": from_trace_id,
             }
-            response = requests.post(url, headers=headers, json=data)
-            return json.loads(response.text)['data']
+            try:
+                response = requests.post(url, headers=headers, json=data)
+                result = json.loads(response.text)
+                if 'data' in result:
+                    return result['data']
+                else:
+                    return f"错误：响应中不包含data字段，响应内容：{response.text}"
+            except Exception as e:
+                return f"错误：{str(e)}，响应内容：{response.text}"
 
         commit_id = get_game_commit_id(token)
+        # 检查commit_id是否为错误信息
+        if isinstance(commit_id, str) and commit_id.startswith("错误："):
+            print(f"获取commit_id失败：{commit_id}")
+            return
+
         father_trace_id = ""
         first_query = "游戏开始。"
         # 处理初始查询
@@ -892,7 +916,7 @@ class MAS(BaseModel):
         payload = {"query": first_query, "from_trace_id": ""}
         oxy_response = await self.chat_with_agent(payload=payload)
         from_trace_id = oxy_response.oxy_request.current_trace_id
-        agent_output = oxy_response.output.lstrip("Answer:")
+        agent_output = oxy_response.output
 
         # MCP交互循环
         while True:
@@ -904,10 +928,13 @@ class MAS(BaseModel):
                                      question_id='1',
                                      trace_id=from_trace_id,
                                      from_trace_id=father_trace_id)
+            if isinstance(mcp_result, str) and mcp_result.startswith("错误："):
+                print(f"提交失败：{mcp_result}")
+                break
             father_trace_id = from_trace_id
             # 检查终止条件
             if mcp_result['game_over']:
-                if mcp_result['is_success']:
+                if mcp_result['score'] > 0:
                     print(f"System: 比赛 {competition_id} 正确答案已确认！, 你的分数是{mcp_result['score']}")
                 else:
                     print(f"System: 比赛 {competition_id} 您已超轮次失败！, 你的分数是{mcp_result['score']}")
@@ -919,7 +946,7 @@ class MAS(BaseModel):
             payload = {"query": '我已经回答的问题：' + query_answer_history, "from_trace_id": from_trace_id}
             oxy_response = await self.chat_with_agent(payload=payload)
             from_trace_id = oxy_response.oxy_request.current_trace_id
-            agent_output = oxy_response.output.replace("Answer:", "")
+            agent_output = oxy_response.output
 
     async def start_web_service(
         self, first_query=None, welcome_message=None, host=None, port=None
