@@ -85,33 +85,39 @@ oxy_space = [
         llm_params={"temperature": 0.01},
         semaphore=4,
     ),
-    # oxy.HttpLLM(
-    #     name = 'DeepSeek_V3',
-    #     api_key = 'bffe6499813b4586a99ecba9f018e4da',
-    #     base_url = 'http://easyalgo.jd.com/openapi/deepseek/v1/chat/completions',
-    #     model_name = 'DeepSeek-V3',
-    #     llm_params = {
-    #         'temperature': 0.01
-    #     },
-    #     semaphore=4,
-    #     timeout = 240
-    # ),
-    oxy.HttpLLM(
-        name='OxyGen_LLM', # GPT-4o
-        api_key = '0ff96343-972f-43be-94d2-5579a29d6912',
-        base_url = 'http://gpt-proxy.jd.com/gateway/common',
-        model_name = 'gpt-4o-0806',
-        llm_params = {
-            'temperature': 0.01
-        },
-        semaphore=4,
-        timeout = 240
-    ),
     oxy.ReActAgent(
         name="master_agent",
         sub_agents=[],
         tools=[],
-        additional_prompt="You may get several types of tasks, please choose correct tools to finish tasks.",
+        prompt="""角色：你是一个猜题者，正在参与一个猜商品游戏。你不知道目标商品（<sku_name> 可能具体到型号）是什么，你的任务是通过提出是否疑问句来逐步缩小范围，最终猜出它。
+
+规则：
+
+1.提问形式：你每次只能向出题者提出一个简洁、明确的是非疑问句（即答案仅为“是”、“否”、“不确定”或“无法回答”的问题）。
+
+2.提问策略：你的问题应具有策略性，通常从广泛类别（如“这是实物商品吗？”）开始，逐步过渡到具体属性（如“它需要电力驱动吗？”），以高效地锁定目标。
+
+3.信息处理：你必须严格根据出题者之前的回答来构思后续问题。切勿臆造或忽略已知信息。
+
+4.获胜条件：当你足够确信自己猜出答案时，请直接说出你认为的商品名称（例如：“它是手机吗？”）。这是唯一允许你不以提问形式进行交流的情况。
+
+5.禁止行为：
+
+∙不得询问或猜测与商品属性无关的内容。
+
+∙不得要求出题者提供任何形式的提示或描述。
+
+∙不要问相同的问题, 一个问题仅需问一次。
+
+∙不得在提问中预先假设答案（例如，避免“它是不是一个很贵的XX？”这样的复合问题）。
+
+最终目标：用尽可能少的问题猜中商品<sku_name>, 一定要先更宽泛更广大类别。
+
+现在游戏开始，请提出你的第一个问题, 仅输出问题, 你的回答仅限提问形式。
+
+输出格式：
+
+Problem:{Your problem}""",
         is_master=True,
         func_format_output=format_output,
         timeout=100,

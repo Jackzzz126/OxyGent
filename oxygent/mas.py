@@ -916,7 +916,6 @@ class MAS(BaseModel):
 
             # 将回答猜题的MCP结果作为用户输入传递给agent
             query_answer_history += "\n" + agent_output + ": " + mcp_result['message']
-            print(query_answer_history)
             payload = {"query": '我已经回答的问题：' + query_answer_history, "from_trace_id": from_trace_id}
             oxy_response = await self.chat_with_agent(payload=payload)
             from_trace_id = oxy_response.oxy_request.current_trace_id
