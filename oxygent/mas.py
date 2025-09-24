@@ -846,6 +846,81 @@ class MAS(BaseModel):
             )
             self.active_tasks[current_trace_id].cancel()
             raise
+    async def start_contest_mode(self, competition_id, token):
+        """MAS与MCP工具交互，直到收到正确答案信号"""
+        import requests
+        def get_game_commit_id(token):
+            url = "http://contest-site-stage.web-p.jd.com/oxy/games/generate_commit_id?functionId=oxy_game_activity&appid=oxygent_contest&loginType=3"
+
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 123456",
+                "Origin": "http://contest-site-stage.web-p.jd.com",
+            }
+            data = {
+                "token": token
+            }
+
+            response = requests.post(url, headers=headers, json=data)
+            return json.loads(response.text)['data']
+        def game_submit(competition_id, commit_id, token, query, question_id, trace_id, from_trace_id):
+            url = "http://contest-site-stage.web-p.jd.com/oxy/games/submit?functionId=oxy_game_activity&appid=oxygent_contest&loginType=3"
+
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 123456",
+                "Origin": "http://contest-site-stage.web-p.jd.com",
+            }
+            data = {
+                "competition_id": str(competition_id),
+                "commit_id": commit_id,
+                "token": token,
+                "query": query,
+                "question_id": question_id,
+                "trace_id": trace_id,
+                "from_trace_id": from_trace_id,
+            }
+            response = requests.post(url, headers=headers, json=data)
+            return json.loads(response.text)['data']
+
+        commit_id = get_game_commit_id(token)
+        father_trace_id = ""
+        first_query = "游戏开始。"
+        # 处理初始查询
+        query_answer_history = ""
+        print("You: ", first_query)
+        payload = {"query": first_query, "from_trace_id": ""}
+        oxy_response = await self.chat_with_agent(payload=payload)
+        from_trace_id = oxy_response.oxy_request.current_trace_id
+        agent_output = oxy_response.output.lstrip("Answer:")
+
+        # MCP交互循环
+        while True:
+            # 将agent输出传递给工具，同时传递比赛ID
+            mcp_result = game_submit(competition_id=competition_id,
+                                     commit_id=commit_id,
+                                     token=token,
+                                     query=agent_output,
+                                     question_id='1',
+                                     trace_id=from_trace_id,
+                                     from_trace_id=father_trace_id)
+            father_trace_id = from_trace_id
+            # 检查终止条件
+            if mcp_result['game_over']:
+                if mcp_result['is_success']:
+                    print(f"System: 比赛 {competition_id} 正确答案已确认！, 你的分数是{mcp_result['score']}")
+                else:
+                    print(f"System: 比赛 {competition_id} 您已超轮次失败！, 你的分数是{mcp_result['score']}")
+                    print(mcp_result)
+                break
+
+            # 将回答猜题的MCP结果作为用户输入传递给agent
+            query_answer_history += "\n" + agent_output + ": " + mcp_result['message']
+            print(query_answer_history)
+            payload = {"query": '我已经回答的问题：' + query_answer_history, "from_trace_id": from_trace_id}
+            oxy_response = await self.chat_with_agent(payload=payload)
+            from_trace_id = oxy_response.oxy_request.current_trace_id
+            agent_output = oxy_response.output.replace("Answer:", "")
 
     async def start_web_service(
         self, first_query=None, welcome_message=None, host=None, port=None
