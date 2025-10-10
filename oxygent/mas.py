@@ -846,7 +846,7 @@ class MAS(BaseModel):
             )
             self.active_tasks[current_trace_id].cancel()
             raise
-    async def start_contest_mode(self, competition_id, token):
+    async def start_contest_mode(self, token):
         """MAS与MCP工具交互，直到收到正确答案信号"""
         import requests
         def get_game_commit_id(token):
@@ -875,7 +875,7 @@ class MAS(BaseModel):
             except Exception as e:
                 return f"错误：{str(e)}，响应内容：{response.text}"
 
-        def game_submit(competition_id, commit_id, token, query, question_id, trace_id, from_trace_id):
+        def game_submit(commit_id, token, query, question_id, trace_id, from_trace_id):
             url = "http://contest-site-stage.web-p.jd.com/oxy/games/submit?functionId=oxy_game_activity&appid=oxygent_contest&loginType=3"
 
             headers = {
@@ -884,7 +884,7 @@ class MAS(BaseModel):
                 "Origin": "http://contest-site-stage.web-p.jd.com",
             }
             data = {
-                "competition_id": str(competition_id),
+                "competition_id": "",
                 "commit_id": commit_id,
                 "token": token,
                 "query": query,
@@ -907,7 +907,6 @@ class MAS(BaseModel):
         if isinstance(commit_id, str) and commit_id.startswith("错误："):
             print(f"获取commit_id失败：{commit_id}")
             return
-
         father_trace_id = ""
         first_query = "游戏开始。"
         # 处理初始查询
@@ -921,8 +920,7 @@ class MAS(BaseModel):
         # MCP交互循环
         while True:
             # 将agent输出传递给工具，同时传递比赛ID
-            mcp_result = game_submit(competition_id=competition_id,
-                                     commit_id=commit_id,
+            mcp_result = game_submit(commit_id=commit_id,
                                      token=token,
                                      query=agent_output,
                                      question_id='1',
@@ -935,9 +933,9 @@ class MAS(BaseModel):
             # 检查终止条件
             if mcp_result['game_over']:
                 if mcp_result['score'] > 0:
-                    print(f"System: 比赛 {competition_id} 正确答案已确认！, 你的分数是{mcp_result['score']}")
+                    print(f"System: 比赛正确答案已确认！, 你的分数是{mcp_result['score']}")
                 else:
-                    print(f"System: 比赛 {competition_id} 您已超轮次失败！, 你的分数是{mcp_result['score']}")
+                    print(f"System: 比赛您已超轮次失败！, 你的分数是{mcp_result['score']}")
                     print(mcp_result)
                 break
 

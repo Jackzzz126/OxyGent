@@ -75,7 +75,6 @@ async def main():
     """
     async with MAS(oxy_space=oxy_space) as mas:
         await mas.start_contest_mode(
-            competition_id='Your competition_id',
             token="""Your token""")
 
 
