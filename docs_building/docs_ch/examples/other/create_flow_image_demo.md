@@ -19,7 +19,7 @@
 ### 技术栈
 
 - **OxyGent**：多代理系统框架
-- **OpenAI 兼容 API**：大语言模型接口（http://llm-32b.jd.com/v1）
+- **OpenAI 兼容 API**：大语言模型接口
 - **Mermaid**：流程图生成库
 - **FastAPI**：Web 服务框架
 - **FunctionHub**：工具函数组织框架
@@ -51,9 +51,9 @@ pip install -r requirements.txt
 在项目根目录创建 `.env` 文件，配置以下环境变量（本示例中使用了硬编码值，但推荐使用环境变量）：
 
 ```
-DEFAULT_LLM_BASE_URL=http://llm-32b.jd.com/v1
-DEFAULT_LLM_MODEL_NAME=qwen25-32b-native
-DEFAULT_LLM_API_KEY=EMPTY
+DEFAULT_LLM_BASE_URL=**
+DEFAULT_LLM_MODEL_NAME=**
+DEFAULT_LLM_API_KEY=**
 ```
 
 ## 快速启动
@@ -72,10 +72,10 @@ source .venv/bin/activate  # Linux/macOS
 
 ```bash
 # 测试 API 连接
-curl -X POST "http://llm-32b.jd.com/v1/chat/completions" \
+curl -X POST "http://**/v1/chat/completions" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer EMPTY" \
-  -d '{"model": "qwen25-32b-native", "messages": [{"role": "user", "content": "Hello"}]}'
+  -H "Authorization: Bearer **" \
+  -d '{"model": "**", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
 
 3. 运行示例程序：
@@ -407,9 +407,9 @@ async def open_html_chart(file_path: str) -> str:
 oxy_space = [
     oxy.HttpLLM(
         name="default_llm",
-        api_key="EMPTY",
-        base_url="http://llm-32b.jd.com/v1",
-        model_name="qwen25-32b-native",
+        api_key="**",
+        base_url="**",
+        model_name="**",
     ),
 
     flow_image_gen_tools,

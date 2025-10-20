@@ -5,7 +5,7 @@
 import os
 import time
 
-def create_static_files():
+def create_static_files(base_path="oxygent/chart"):
     """创建必要的静态文件"""
     # 创建 index.html
     index_html = """<!DOCTYPE html>
@@ -137,11 +137,11 @@ button:hover {
 });"""
     
     # 写入文件
-    with open("oxygent/chart/web/index.html", "w", encoding="utf-8") as f:
+    with open(f"{base_path}/web/index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
     
-    with open("oxygent/chart/web/css/style.css", "w", encoding="utf-8") as f:
+    with open(f"{base_path}/web/css/style.css", "w", encoding="utf-8") as f:
         f.write(style_css)
     
-    with open("oxygent/chart/web/js/app.js", "w", encoding="utf-8") as f:
+    with open(f"{base_path}/web/js/app.js", "w", encoding="utf-8") as f:
         f.write(app_js)

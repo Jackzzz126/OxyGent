@@ -26,7 +26,16 @@ async def open_html_chart(file_path: str) -> str:
     try:
         # 确保使用绝对路径
         if not os.path.isabs(file_path):
-            output_path_abs = os.path.abspath(file_path)
+            # 如果是相对路径，需要考虑当前工作目录
+            current_dir = os.getcwd()
+            
+            # 如果当前在 examples/other 目录，并且文件路径以 output/ 开头，需要调整路径
+            if (current_dir.endswith('examples/other') or current_dir.endswith('examples\\other')) and file_path.startswith('output/'):
+                # 回到项目根目录来解析路径
+                project_root = os.path.abspath(os.path.join(current_dir, '../..'))
+                output_path_abs = os.path.join(project_root, file_path)
+            else:
+                output_path_abs = os.path.abspath(file_path)
         else:
             output_path_abs = file_path
             
