@@ -5,13 +5,13 @@ OxyGent所指的LLM是传统的LLM形式，它支持输入一个字符串并输�
 ## 调用一般模型
 
 ```python
-    from oxygent.utils.env_utils import get_env_var
+    import os
 
     oxy.HttpLLM(
         name="default_llm",
-        api_key=get_env_var("DEFAULT_LLM_API_KEY"), # 或者使用 os.getenv("DEFAULT_LLM_API_KEY")
-        base_url=get_env_var("DEFAULT_LLM_BASE_URL"),
-        model_name=get_env_var("DEFAULT_LLM_MODEL_NAME"),
+        api_key=os.getenv("DEFAULT_LLM_API_KEY"),
+        base_url=os.getenv("DEFAULT_LLM_BASE_URL"),
+        model_name=os.getenv("DEFAULT_LLM_MODEL_NAME"),
         llm_params={"temperature": 0.01},
         semaphore=4, # 并发量
         timeout=240, # 最大执行时间
@@ -28,9 +28,9 @@ OxyGent所指的LLM是传统的LLM形式，它支持输入一个字符串并输�
 ```python
     oxy.OpenAILLM(
         name="default_llm",
-        api_key=get_env_var("DEFAULT_LLM_API_KEY"), # 或者使用 os.getenv("DEFAULT_LLM_API_KEY")
-        base_url=get_env_var("DEFAULT_LLM_BASE_URL"),
-        model_name=get_env_var("DEFAULT_LLM_MODEL_NAME"),
+        api_key=os.getenv("DEFAULT_LLM_API_KEY"),
+        base_url=os.getenv("DEFAULT_LLM_BASE_URL"),
+        model_name=os.getenv("DEFAULT_LLM_MODEL_NAME"),
         llm_params={"temperature": 0.01},
         semaphore=4,
         timeout=240,
@@ -46,7 +46,7 @@ OxyGent所指的LLM是传统的LLM形式，它支持输入一个字符串并输�
         name="local_gemma",  
         # 注意不要传入api_key参数
         base_url="http://localhost:11434/api/chat", # 替换为本地的url接口
-        model_name=get_env_var("DEFAULT_OLLAMA_MODEL"),   
+        model_name=os.getenv("DEFAULT_OLLAMA_MODEL"),   
         llm_params={"temperature": 0.2},    
         semaphore=1,              
         timeout=240,

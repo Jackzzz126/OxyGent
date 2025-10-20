@@ -50,7 +50,7 @@ Config.set_es_config(
     {
         "hosts": ["${PROD_ES_HOST_1}", "${PROD_ES_HOST_2}", "${PROD_ES_HOST_3}"],
         "user": "${PROD_ES_USER}",
-        "password": "${ES_TEST_PASSWORD}",
+        "password": "${PROD_ES_PASSWORD}",
     }
 )
 ```

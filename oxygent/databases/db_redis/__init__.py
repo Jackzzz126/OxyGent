@@ -8,4 +8,8 @@ else:
 from .base_redis import BaseRedis
 from .local_redis import LocalRedis
 
-__all__ = ["JimdbApRedis", "BaseRedis", "LocalRedis"]
+__all__ = [
+    "JimdbApRedis",
+    "BaseRedis",
+    "LocalRedis",
+]

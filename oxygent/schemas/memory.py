@@ -181,20 +181,3 @@ class Memory(BaseModel):
                 messages.insert(0, self.messages[0])
             return [msg.to_dict() for msg in messages]
         return [msg.to_dict() for msg in self.messages]
-
-    # def _trim_memory(self) -> None:
-    #     """Ensure memory does not exceed max_messages, keeping system first and deleting (user, agent) pairs."""
-    #     while len(self.messages) > self.max_messages:
-    #         if len(self.messages) <= 1:
-    #             # Only system remains, nothing to delete
-    #             break
-
-    #         # Always keep system as the first message
-    #         # Delete the first (user, agent) pair after system
-    #         # Ensure at least two messages exist after system to delete
-    #         if len(self.messages) >= 3:
-    #             # Remove messages[1] and messages[2]
-    #             del self.messages[1:3]
-    #         else:
-    #             # If only system + one message left but still exceeds max, delete the last
-    #             self.messages.pop()

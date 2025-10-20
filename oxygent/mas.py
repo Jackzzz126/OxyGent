@@ -147,8 +147,6 @@ class MAS(BaseModel):
         import platform
         from datetime import datetime
 
-        # logger.info(f"MAS app name: {Config.get_app_name()}")
-        # logger.info(f"MAS app env: {Config._env}")
         logger.info("=" * 64)
         logger.info("🚀 OxyGent MAS Application Startup Information")
         logger.info("=" * 64)
@@ -157,7 +155,6 @@ class MAS(BaseModel):
         logger.info(f"Environment  : {Config._env}")
         logger.info(f"Port         : {Config.get_server_port()}")
         logger.info(f"Python Ver   : {platform.python_version()}")
-        # logger.info(f"Config Path  : {Config.get_config_path()}")
         logger.info(f"Cache Dir    : {Config.get_cache_save_dir()}")
         logger.info(f"Start Time   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info("=" * 64)
@@ -172,9 +169,6 @@ class MAS(BaseModel):
             ValueError: If another component with the same ``oxy.name``
                 already exists in the registry.
         """
-        # print(self.oxy_name_to_oxy)
-        # import pdb
-        # pdb.set_trace()
         if oxy.name in self.oxy_name_to_oxy:
             raise Exception(f"oxy [{oxy.name}] already exists.")
         self.oxy_name_to_oxy[oxy.name] = oxy
@@ -583,15 +577,27 @@ class MAS(BaseModel):
             redis_key: Target Redis key (usually ``mas_msg:{app}:{trace_id}``).
         """
         if Config.get_message_is_show_in_terminal():
-            logger.info(message)
-        bytes_msg = msgpack.packb(msgpack_preprocess(message))
-        if Config.get_message_is_stored():
+            logger.info(f"--- Send Message ---: {message}")
+
+        message_type = ""
+        message_is_stored = Config.get_message_is_stored()
+        message_is_send = True
+        _is_stored, _is_send = "_is_stored", "_is_send"
+        if isinstance(message, dict):
+            message_type = message.get("type", "")
+            if _is_stored in message:
+                message_is_stored = message[_is_stored]
+                del message[_is_stored]
+            if _is_send in message:
+                message_is_send = message[_is_send]
+                del message[_is_send]
+
+        if message_is_stored:
             parts = redis_key.split(":")
             current_trace_id = parts[-1] if len(parts) >= 3 else ""
 
             # Insert into Elasticsearch
             message_id = generate_uuid()
-            message_type = message.get("type", "") if isinstance(message, dict) else ""
             await self.es_client.index(
                 Config.get_app_name() + "_message",
                 doc_id=message_id,
@@ -603,7 +609,9 @@ class MAS(BaseModel):
                     "create_time": get_format_time(),
                 },
             )
-        await self.redis_client.lpush(redis_key, bytes_msg)
+        if message_is_send:
+            bytes_msg = msgpack.packb(msgpack_preprocess(message))
+            await self.redis_client.lpush(redis_key, bytes_msg)
 
     async def chat_with_agent(
         self,

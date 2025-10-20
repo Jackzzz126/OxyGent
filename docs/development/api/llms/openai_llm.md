@@ -37,9 +37,9 @@ No additional parameters beyond inherited ones.
 ```python
     oxy.OpenAILLM(
         name="default_llm",
-        api_key=get_env_var("DEFAULT_LLM_API_KEY"), 
-        base_url=get_env_var("DEFAULT_LLM_BASE_URL"),
-        model_name=get_env_var("DEFAULT_LLM_MODEL_NAME"),
+        api_key=os.getenv("DEFAULT_LLM_API_KEY"), 
+        base_url=os.getenv("DEFAULT_LLM_BASE_URL"),
+        model_name=os.getenv("DEFAULT_LLM_MODEL_NAME"),
         llm_params={"temperature": 0.01},
         semaphore=4,
         timeout=240,
