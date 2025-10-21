@@ -31,7 +31,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 Config.set_agent_llm_model("default_llm")
-Config.set_server_auto_open_webpage(True)  # 启用自动打开浏览器
+# Config.set_server_auto_open_webpage(False)  # 禁用自动打开浏览器
 
 # 定义 chart_flow_agent 的提示语模板
 MASTER_AGENT_PROMPT = """
