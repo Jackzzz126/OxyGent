@@ -48,7 +48,7 @@ class TestMASConfiguration:
     def test_config_setup(self):
         """Test basic configuration setup."""
         # Test that Config can be set
-        Config.set_agent_llm_model("test_llm")
+        Config.set_agent_llm_model("default_llm")
         # This should not raise any exceptions
         assert True
     
@@ -56,10 +56,10 @@ class TestMASConfiguration:
         """Test that all required components are available."""
         # Test that we can create the basic components
         test_llm = oxy.HttpLLM(
-            name="test_llm",
-            api_key="test_key",
-            base_url="http://test.com",
-            model_name="test_model",
+            name="default_llm",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL"),
+            model_name=os.getenv("OPENAI_MODEL_NAME"),
         )
         
         # Test agent creation
@@ -76,7 +76,7 @@ class TestMASConfiguration:
         )
         
         # Verify objects are created successfully
-        assert test_llm.name == "test_llm"
+        assert test_llm.name == "default_llm"
         assert image_gen_agent.name == "image_gen_agent"
         assert open_chart_agent.name == "open_chart_agent"
 
@@ -174,10 +174,10 @@ class TestMASSystemIntegration:
         # Create a minimal oxy_space for testing
         test_oxy_space = [
             oxy.HttpLLM(
-                name="test_llm",
-                api_key="test_key",
-                base_url="http://test.com", 
-                model_name="test_model",
+                name="default_llm",
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=os.getenv("OPENAI_BASE_URL"),
+                model_name=os.getenv("OPENAI_MODEL_NAME"),
             ),
             flow_image_gen_tools,
             open_chart_tools,
@@ -189,17 +189,17 @@ class TestMASSystemIntegration:
         assert test_oxy_space[2] == open_chart_tools
         
         # Test that the HttpLLM was created correctly
-        assert test_oxy_space[0].name == "test_llm"
-        assert test_oxy_space[0].api_key == "test_key"
-        assert test_oxy_space[0].base_url == "http://test.com"
-        assert test_oxy_space[0].model_name == "test_model"
+        assert test_oxy_space[0].name == "default_llm"
+        assert test_oxy_space[0].api_key == os.getenv("OPENAI_API_KEY")
+        assert test_oxy_space[0].base_url == os.getenv("OPENAI_BASE_URL")
+        assert test_oxy_space[0].model_name == os.getenv("OPENAI_MODEL_NAME")
     
     def test_agent_configuration(self):
         """Test agent configuration matches demo requirements."""
         # Test master agent configuration
         master_agent = oxy.ReActAgent(
             name="master_agent",
-            llm_model="test_llm",
+            llm_model="default_llm",
             is_master=True,
             sub_agents=["image_gen_agent", "open_chart_agent"],
             tools=["flow_image_gen_tools", "open_chart_tools"],
@@ -307,15 +307,15 @@ async def test_full_integration_simulation():
     # This test simulates the main workflow without actually starting services
     
     # 1. Test configuration setup
-    Config.set_agent_llm_model("test_llm")
+    Config.set_agent_llm_model("default_llm")
     
     # 2. Test oxy_space creation
     test_oxy_space = [
         oxy.HttpLLM(
-            name="test_llm",
-            api_key="test_key",
-            base_url="http://test.com",
-            model_name="test_model",
+            name="default_llm",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL"),
+            model_name=os.getenv("OPENAI_MODEL_NAME"),
         ),
         flow_image_gen_tools,
         open_chart_tools,
