@@ -18,6 +18,14 @@ oxy_space = [
         },
     ),
     oxy.StdioMCPClient(
+        name="map_tools",
+        params={
+            "command": "npx",
+            "args": ["-y", "@amap/amap-maps-mcp-server"],
+            "env": {"AMAP_MAPS_API_KEY": "API_KEY"},  # 配置高德地图API密钥
+        },
+    ),
+    oxy.StdioMCPClient(
         name="math_tools",
         params={
             "command": "uv",

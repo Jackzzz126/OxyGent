@@ -3,7 +3,9 @@
 import asyncio
 import os
 
-from oxygent import MAS, OxyRequest, OxyResponse, oxy
+from oxygent import MAS, Config, OxyRequest, OxyResponse, oxy
+
+Config.set_agent_short_memory_size(7)
 
 
 def update_query(oxy_request: OxyRequest) -> OxyRequest:

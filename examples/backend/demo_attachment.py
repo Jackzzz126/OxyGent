@@ -20,12 +20,15 @@ oxy_space = [
 
 async def main():
     async with MAS(oxy_space=oxy_space) as mas:
+        # 直接调用
         payload = {
             "query": "Introduce the content of the file",
             "attachments": ["README.md"],
         }
         oxy_response = await mas.chat_with_agent(payload=payload)
         print("LLM: ", oxy_response.output)
+        # 启动web服务
+        await mas.start_web_service(first_query="Introduce the content of the file")
 
 
 if __name__ == "__main__":
