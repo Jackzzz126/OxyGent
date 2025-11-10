@@ -86,8 +86,6 @@ class Oxy(BaseModel, ABC):
 
     is_entrance: bool = Field(False, description="Whether this is a MAS entry point")
 
-    is_entrance: bool = Field(False, description="Whether is the entrance of MAS")
-
     is_permission_required: bool = Field(False, description="Whether needs permission")
     is_save_data: bool = Field(True, description="Whether to save data")
     permitted_tool_name_list: list = Field(
@@ -254,30 +252,26 @@ class Oxy(BaseModel, ABC):
     async def _request_interceptor(self, oxy_request: OxyRequest):
         if (
             oxy_request.reference_trace_id
+            and oxy_request.restart_node_id
             and oxy_request.is_load_data_for_restart
             and self.mas
             and self.mas.es_client
             and self.category in ["llm", "tool"]
         ):
-            if oxy_request.restart_node_id:
-                es_response = await self.mas.es_client.search(
-                    Config.get_app_name() + "_node",
-                    {
-                        "query": {
-                            "bool": {
-                                "must": [
-                                    {
-                                        "term": {
-                                            "trace_id": oxy_request.reference_trace_id
-                                        }
-                                    },
-                                    {"term": {"input_md5": oxy_request.input_md5}},
-                                ]
-                            }
-                        },
-                        "size": 1,
+            es_response = await self.mas.es_client.search(
+                Config.get_app_name() + "_node",
+                {
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"term": {"trace_id": oxy_request.reference_trace_id}},
+                                {"term": {"input_md5": oxy_request.input_md5}},
+                            ]
+                        }
                     },
-                )
+                    "size": 1,
+                },
+            )
             logging.info(f"ES search returned {len(es_response['hits']['hits'])} hits")
             if es_response["hits"]["hits"]:
                 current_node_order = es_response["hits"]["hits"][0]["_source"][

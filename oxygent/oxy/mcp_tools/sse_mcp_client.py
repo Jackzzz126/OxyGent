@@ -42,7 +42,11 @@ class SSEMCPClient(BaseMCPClient):
             if not self.is_dynamic_headers and self.is_keep_alive:
                 # header
                 sse_transport = await self._exit_stack.enter_async_context(
-                    sse_client(build_url(self.sse_url), headers=self.headers)
+                    sse_client(
+                        build_url(self.sse_url),
+                        headers=self.headers,
+                        timeout=self.timeout,
+                    )
                 )
                 read, write = sse_transport
                 self._session = await self._exit_stack.enter_async_context(
@@ -64,7 +68,7 @@ class SSEMCPClient(BaseMCPClient):
                     await self.list_tools()
             else:
                 async with sse_client(
-                    build_url(self.sse_url), headers=self.headers
+                    build_url(self.sse_url), headers=self.headers, timeout=self.timeout
                 ) as streams:
                     async with ClientSession(*streams) as session:
                         await session.initialize()
@@ -76,7 +80,9 @@ class SSEMCPClient(BaseMCPClient):
             raise Exception(f"Server {self.name} error")
 
     async def call_tool(self, tool_name, arguments, headers=None):
-        async with sse_client(build_url(self.sse_url), headers=headers) as streams:
+        async with sse_client(
+            build_url(self.sse_url), headers=headers, timeout=self.timeout
+        ) as streams:
             async with ClientSession(*streams) as session:
                 await session.initialize()
                 return await session.call_tool(tool_name, arguments)

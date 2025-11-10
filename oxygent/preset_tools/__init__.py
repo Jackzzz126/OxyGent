@@ -13,7 +13,6 @@ tool_modules = [
     "system_tools",
     "shell_tools",
     "python_tools",
-    "baidu_search_tools",
     "image_gen_tools",
 ]
 

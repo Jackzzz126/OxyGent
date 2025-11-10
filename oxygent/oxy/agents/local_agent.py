@@ -172,14 +172,9 @@ class LocalAgent(BaseAgent):
             self.llm_model
         ].is_multimodal_supported
         if self.is_multimodal_supported:
-            self.input_schema = {
-                "properties": {
-                    "query": {
-                        "description": "The image path and the query to ask about the images, for example: ![file 1](image1.png) ![file 2](image2.png) What are file 1 and file 2, respectively?"
-                    }
-                },
-                "required": ["query"],
-            }
+            self.input_schema["properties"]["query"]["description"] = (
+                "The image path and the query to ask about the images, for example: ![file 1](image1.png) ![file 2](image2.png) What are file 1 and file 2, respectively?"
+            )
 
         await super().init()
         if self.intent_understanding_agent:

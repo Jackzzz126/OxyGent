@@ -79,8 +79,21 @@ class BaseLLM(Oxy):
         default=2 * 1024 * 1024,
         description="Maximum non-media file size (bytes) for base64 embedding.",
     )
+    is_disable_system_prompt: bool = Field(default=False)
 
     async def _get_messages(self, oxy_request: OxyRequest):
+        # merge system prompt
+        if (
+            self.is_disable_system_prompt
+            and oxy_request.arguments["messages"][0].get("role") == "system"
+        ):
+            oxy_request.arguments["messages"][1]["content"] = (
+                oxy_request.arguments["messages"][0]["content"]
+                + "\nUser Input: "
+                + oxy_request.arguments["messages"][1]["content"]
+            )
+            oxy_request.arguments["messages"] = oxy_request.arguments["messages"][1:]
+
         # Preprocess messages for multimoding input
         if not self.is_multimodal_supported:
             return oxy_request.arguments["messages"]

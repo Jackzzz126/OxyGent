@@ -27,7 +27,9 @@ class StreamableMCPClient(BaseMCPClient):
             if not self.is_dynamic_headers and self.is_keep_alive:
                 self._http_transport = await self._exit_stack.enter_async_context(
                     streamablehttp_client(
-                        build_url(self.server_url), headers=self.headers
+                        build_url(self.server_url),
+                        headers=self.headers,
+                        timeout=self.timeout,
                     )
                 )
                 read, write, _ = self._http_transport
@@ -47,12 +49,10 @@ class StreamableMCPClient(BaseMCPClient):
                     await self.list_tools()
             else:
                 async with streamablehttp_client(
-                    build_url(self.server_url), headers=self.headers
-                ) as (
-                    read,
-                    write,
-                    _,
-                ):
+                    build_url(self.server_url),
+                    headers=self.headers,
+                    timeout=self.timeout,
+                ) as (read, write, _):
                     async with ClientSession(read, write) as session:
                         await session.initialize()
                         tools_response = await session.list_tools()
@@ -64,12 +64,8 @@ class StreamableMCPClient(BaseMCPClient):
 
     async def call_tool(self, tool_name, arguments, headers=None):
         async with streamablehttp_client(
-            build_url(self.server_url), headers=headers
-        ) as (
-            read,
-            write,
-            _,
-        ):
+            build_url(self.server_url), headers=headers, timeout=self.timeout
+        ) as (read, write, _):
             async with ClientSession(read, write) as session:
                 await session.initialize()
                 return await session.call_tool(tool_name, arguments)
