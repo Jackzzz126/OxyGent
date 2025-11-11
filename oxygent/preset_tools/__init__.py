@@ -14,6 +14,7 @@ tool_modules = [
     "shell_tools",
     "python_tools",
     "image_gen_tools",
+    "sql_tools",
 ]
 
 __all__ = []
