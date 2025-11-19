@@ -35,7 +35,7 @@ oxy_space = [
 async def main():
     async with MAS(oxy_space=oxy_space) as mas:
         await mas.start_web_service(
-            first_query="What time is it now? Please save it into time.txt."
+            first_query="hello"
         )
 
 

@@ -1,0 +1,43 @@
+慢SQL语句,执行慢原因分析,治理建议
+"SELECT DISTINCT a.* FROM product_base_info a LEFT JOIN product_base_info b ON a.product_id = b.product_id WHERE a.product_status = 1 AND b.product_status = 1 AND a.product_name LIKE '%手机%' ORDER BY a.created_time DESC","1. 自连接查询导致全表扫描两次
+2. LIKE模糊查询无法使用索引
+3. SELECT * 返回所有字段增加IO开销
+4. ORDER BY排序操作消耗内存
+5. DISTINCT去重增加CPU计算负担","1. 避免自连接，考虑使用EXISTS或窗口函数
+2. 在product_name字段上建立全文索引
+3. 只查询需要的字段，避免SELECT *
+4. 在created_time字段上建立索引优化排序
+5. 考虑使用分页查询减少数据量
+6. 添加复合索引(product_status, created_time)"
+"SELECT COUNT(*) FROM stock_info WHERE sku_id IN (SELECT sku_id FROM product_base_info WHERE product_status = 1 AND category_1 = 1001)","1. IN子查询导致嵌套循环查询
+2. 子查询返回大量sku_id数据
+3. COUNT(*)需要扫描所有匹配记录
+4. 缺乏有效的索引支持","1. 将IN子查询改为JOIN查询：SELECT COUNT(*) FROM stock_info s JOIN product_base_info p ON s.sku_id = p.sku_id WHERE p.product_status = 1 AND p.category_1 = 1001
+2. 在stock_info.sku_id上建立索引
+3. 在product_base_info上建立复合索引(product_status, category_1, sku_id)
+4. 考虑使用物化视图缓存统计结果"
+"SELECT * FROM used_sku_mapping_extend WHERE used_sku LIKE '%iPhone%'","1. 模糊查询LIKE '%xxx%'无法使用B+树索引
+2. SELECT * 返回所有字段增加IO开销
+3. 可能扫描大量历史数据
+4. 缺乏有效的查询条件过滤","1. 在used_sku字段上建立全文索引
+2. 只查询需要的字段，避免SELECT *
+3. 添加时间范围等其他过滤条件
+4. 考虑使用Elasticsearch等搜索引擎
+5. 如果数据量大，考虑分表或分区"
+"SELECT * FROM rule_condition WHERE rule_type = 'price' AND condition_value > 1000","1. SELECT * 返回所有字段增加IO开销
+2. 查询条件过滤性较差，可能返回大量数据
+3. 缺乏复合索引支持
+4. 大字段查询增加网络传输开销","1. 只查询需要的字段，避免SELECT *
+2. 建立复合索引(rule_type, condition_value)
+3. 添加更多过滤条件提高选择性
+4. 考虑分页查询避免一次性返回大量数据
+5. 定期清理历史数据"
+"SELECT a.*, b.order_id FROM pp_sku_order_rel a LEFT JOIN order_info b ON a.order_id = b.order_id WHERE a.created_time >= '2024-01-01' AND a.created_time <= '2024-01-31'","1. SELECT a.* 返回所有字段增加IO开销
+2. 时间范围查询可能扫描大量历史数据
+3. LEFT JOIN操作增加查询复杂度
+4. 缺乏有效的索引支持时间范围查询","1. 只查询需要的字段，避免SELECT a.*
+2. 在pp_sku_order_rel.created_time上建立索引
+3. 考虑分区表按时间分区
+4. 如果order_info表数据量大，在order_id上建立索引
+5. 评估是否必须使用LEFT JOIN，考虑使用INNER JOIN
+6. 添加更多过滤条件减少数据扫描范围"
