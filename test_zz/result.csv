@@ -1,0 +1,2 @@
+慢SQL语句,表名,表结构,索引情况,慢SQL原因分析,优化建议
+"delete from used_order_latest where create_time < '2025-11-06 00:00:00';","used_order_latest","字段：id(bigint),pin(varchar),latest_order_id(bigint),latest_order_time(datetime),creator(varchar),create_time(datetime),updater(varchar),update_time(datetime),yn(tinyint)","PRIMARY KEY(id), INDEX idx_create_time(create_time)","1.数据量过大导致大批量删除性能差 2.create_time索引选择性不高 3.锁竞争和redo log压力","1.分批删除(每次1000-10000行) 2.使用FORCE INDEX强制索引 3.按时间范围分段删除 4.更新表统计信息 5.考虑归档策略"
